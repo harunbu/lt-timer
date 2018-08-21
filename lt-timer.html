@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>LTタイマー</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+    }
+    #app {
+      text-align: center;
+    }
+    .time {
+      font-size: 100px;
+    }
+    .msec {
+      font-size: 50px;
+    }
+    #progressBar {
+      background-color: white;
+      height: 15px;
+      width: 450px;
+      margin: 30px auto;
+    }
+    #progressBarInner {
+      height: 15px;
+      transform-origin: left;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div class="time">
+    {{min}}′{{sec}}″
+  </div>
+  <div id="progressBar">
+    <div id="progressBarInner" :style="progressBarInnerStyle"></div>
+  </div>
+  <button v-on:click="toggle">開始／停止</button>
+  <button v-on:click="reset">リセット</button>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<script>
+const data = {
+  running: false,
+  startMsec: 0,
+  preMsec: 0,
+  srcMsec: 0,
+  maxMsec: (1000 * 60 * 1),
+};
+var app = new Vue({
+  el: '#app',
+  data: data,
+  computed: {
+    sec: function(){
+      return ('0'+(Math.floor(data.srcMsec / 1000) % 60)).slice(-2);
+    },
+    min: function(){
+      return ('0'+Math.floor(data.srcMsec / (1000 * 60))).slice(-1);
+    },
+    msec: function(){
+      return ('0'+(Math.floor(data.srcMsec / 100) % 10)).slice(-1);
+    },
+    progressBarInnerStyle: function(){
+      let scale = 1;
+      if (data.srcMsec < data.maxMsec) {
+        scale = data.srcMsec / data.maxMsec
+      }
+      let color = 'blue';
+      if (scale > 0.9) {
+        color = 'red';
+      } else if (scale > 0.5) {
+        color = 'orange';
+      }
+      return {
+        transform: `scaleX(${scale})`,
+        'background-color': color,
+      };
+    },
+  },
+  mounted: function(){
+    setInterval(tick, 100);
+  },
+  methods: {
+    toggle: function(){
+      if (data.running) {
+        data.preMsec = data.srcMsec;
+        data.running = false;
+      } else {
+        data.startMsec = (new Date()).getTime();
+        data.running = true;
+      }
+    },
+    reset: function(){
+      data.preMsec = 0;
+      this.srcMsec = 0;
+      data.startMsec = (new Date()).getTime();
+    },
+  },
+});
+
+function tick() {
+  if (data.running) {
+    data.srcMsec = data.preMsec + ((new Date()).getTime() - data.startMsec);
+  }
+}
+
+</script>
+</html>
