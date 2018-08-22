@@ -96,9 +96,9 @@ var app = new Vue({
       data.startMsec = (new Date()).getTime();
     },
     keyUpListener: function(evt) {
-      if (evt.keyCode === 32) {
+      if (evt.key === ' ') {
         this.toggle();
-      }else if (evt.keyCode === 82) {
+      }else if (evt.key === 'r') {
         this.reset();
       }
     }
