@@ -32,13 +32,13 @@
 <body>
 <div id="app">
   <div class="time">
-    {{min}}′{{sec}}″
+    {{min}}′{{sec}}″<span class="msec">{{msec}}</span>
   </div>
   <div id="progressBar">
     <div id="progressBarInner" :style="progressBarInnerStyle"></div>
   </div>
-  <button v-on:click="toggle">開始／停止</button>
-  <button v-on:click="reset">リセット</button>
+  <button @click="toggle">開始／停止(space)</button>
+  <button @click="reset">リセット(r)</button>
 </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
@@ -69,7 +69,7 @@ var app = new Vue({
         scale = data.srcMsec / data.maxMsec
       }
       let color = 'blue';
-      if (scale > 0.9) {
+      if (scale > 0.8) {
         color = 'red';
       } else if (scale > 0.5) {
         color = 'orange';
@@ -79,9 +79,6 @@ var app = new Vue({
         'background-color': color,
       };
     },
-  },
-  mounted: function(){
-    setInterval(tick, 100);
   },
   methods: {
     toggle: function(){
@@ -98,6 +95,22 @@ var app = new Vue({
       this.srcMsec = 0;
       data.startMsec = (new Date()).getTime();
     },
+    keyUpListener: function(evt) {
+      if (evt.keyCode === 32) {
+        this.toggle();
+      }else if (evt.keyCode === 82) {
+        this.reset();
+      }
+    }
+  },
+  mounted: function(){
+    setInterval(tick, 100);
+  },
+  created: function() {
+    document.addEventListener('keyup', this.keyUpListener);
+  },
+  destroyed: function() {
+    document.removeEventListener('keyup', this.keyUpListener);
   },
 });
 
