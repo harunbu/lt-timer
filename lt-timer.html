@@ -37,88 +37,118 @@
   <div id="progressBar">
     <div id="progressBarInner" :style="progressBarInnerStyle"></div>
   </div>
-  <button @click="toggle">開始／停止(space)</button>
+  <button @click="toggle">開始／停止(s)</button>
   <button @click="reset">リセット(r)</button>
 </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
 <script>
-const data = {
-  running: false,
-  startMsec: 0,
-  preMsec: 0,
-  srcMsec: 0,
-  maxMsec: (1000 * 60 * 5),
-};
-var app = new Vue({
-  el: '#app',
-  data: data,
-  computed: {
-    sec: function(){
-      return ('0'+(Math.floor(data.srcMsec / 1000) % 60)).slice(-2);
+  const ses = [
+    {
+      msec: 0,
+      audio: new Audio('./sounds/gong-played1.mp3')
     },
-    min: function(){
-      return ('0'+Math.floor(data.srcMsec / (1000 * 60))).slice(-1);
+    {
+      msec: 1000 * 60 * 4,
+      audio: new Audio('./sounds/hyoushigi2.mp3'),
     },
-    msec: function(){
-      return ('0'+(Math.floor(data.srcMsec / 100) % 10)).slice(-1);
+    {
+      msec: 1000 * 60 * 5,
+      audio: new Audio('./sounds/gong-played2.mp3'),
     },
-    progressBarInnerStyle: function(){
-      let scale = 1;
-      if (data.srcMsec < data.maxMsec) {
-        scale = data.srcMsec / data.maxMsec
-      }
-      let color = 'blue';
-      if (scale > 0.8) {
-        color = 'red';
-      } else if (scale > 0.5) {
-        color = 'orange';
-      }
-      return {
-        transform: `scaleX(${scale})`,
-        'background-color': color,
-      };
+    {
+      msec: 1000 * 60 * 7,
+      audio: new Audio('./sounds/solemnity1.mp3'),
+    }
+  ];
+  const maxMsec = 1000 * 60 * 7;
+
+  const data = {
+    running: false,
+    startMsec: 0,
+    preMsec: 0,
+    srcMsec: 0,
+    maxMsec: (1000 * 60 * 5),
+  };
+
+  var app = new Vue({
+    el: '#app',
+    data: data,
+    computed: {
+      sec: function(){
+        return ('0'+(Math.floor(data.srcMsec / 1000) % 60)).slice(-2);
+      },
+      min: function(){
+        return ('0'+Math.floor(data.srcMsec / (1000 * 60))).slice(-1);
+      },
+      msec: function(){
+        return ('0'+(Math.floor(data.srcMsec / 100) % 10)).slice(-1);
+      },
+      progressBarInnerStyle: function(){
+        let scale = 1;
+        if (data.srcMsec < data.maxMsec) {
+          scale = data.srcMsec / data.maxMsec
+        }
+        let color = 'blue';
+        if (scale > 0.8) {
+          color = 'red';
+        } else if (scale > 0.5) {
+          color = 'orange';
+        }
+        return {
+          transform: `scaleX(${scale})`,
+          'background-color': color,
+        };
+      },
     },
-  },
-  methods: {
-    toggle: function(){
-      if (data.running) {
-        data.preMsec = data.srcMsec;
-        data.running = false;
-      } else {
+    methods: {
+      toggle: function(){
+        if (data.running) {
+          data.preMsec = data.srcMsec;
+          data.running = false;
+        } else if (data.srcMsec < maxMsec) {
+          data.startMsec = (new Date()).getTime();
+          data.running = true;
+        }
+      },
+      reset: function(){
+        data.preMsec = 0;
+        data.srcMsec = 0;
         data.startMsec = (new Date()).getTime();
-        data.running = true;
+      },
+      keyUpListener: function(evt) {
+        if (evt.key === 's') {
+          this.toggle();
+        }else if (evt.key === 'r') {
+          this.reset();
+        }
       }
     },
-    reset: function(){
-      data.preMsec = 0;
-      this.srcMsec = 0;
-      data.startMsec = (new Date()).getTime();
+    mounted: function(){
+      setInterval(tick, 100);
     },
-    keyUpListener: function(evt) {
-      if (evt.key === ' ') {
-        this.toggle();
-      }else if (evt.key === 'r') {
-        this.reset();
+    created: function() {
+      document.addEventListener('keyup', this.keyUpListener);
+    },
+    destroyed: function() {
+      document.removeEventListener('keyup', this.keyUpListener);
+    },
+  });
+
+  function tick() {
+    if (data.running) {
+      const preSrcMsec = data.srcMsec;
+      data.srcMsec = data.preMsec + ((new Date()).getTime() - data.startMsec);
+      for (const se of ses) {
+        if (preSrcMsec <= se.msec && data.srcMsec > se.msec) {
+          se.audio.play();
+        }
+      }
+      if (data.srcMsec > maxMsec) {
+        data.running = false;
       }
     }
-  },
-  mounted: function(){
-    setInterval(tick, 100);
-  },
-  created: function() {
-    document.addEventListener('keyup', this.keyUpListener);
-  },
-  destroyed: function() {
-    document.removeEventListener('keyup', this.keyUpListener);
-  },
-});
-
-function tick() {
-  if (data.running) {
-    data.srcMsec = data.preMsec + ((new Date()).getTime() - data.startMsec);
   }
-}
 
 </script>
 </html>
