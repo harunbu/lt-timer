@@ -68,7 +68,7 @@
     startMsec: 0,
     preMsec: 0,
     srcMsec: 0,
-    maxMsec: (1000 * 60 * 5),
+    progressBarMaxMsec: (1000 * 60 * 5),
   };
 
   var app = new Vue({
@@ -86,8 +86,8 @@
       },
       progressBarInnerStyle: function(){
         let scale = 1;
-        if (data.srcMsec < data.maxMsec) {
-          scale = data.srcMsec / data.maxMsec
+        if (data.srcMsec < data.progressBarMaxMsec) {
+          scale = data.srcMsec / data.progressBarMaxMsec
         }
         let color = 'blue';
         if (scale > 0.8) {
@@ -145,6 +145,7 @@
         }
       }
       if (data.srcMsec > maxMsec) {
+        data.srcMsec = maxMsec;
         data.running = false;
       }
     }
