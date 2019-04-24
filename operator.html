@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>LTタイマー：操作盤</title>
+</head>
+<body>
+<div id="app">
+    <button @click="toggle">開始／停止(s)</button>
+    <button @click="reset">リセット(r)</button>
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    var socket = io();
+
+    var app = new Vue({
+        el: '#app',
+        methods: {
+            toggle: function(){
+                socket.emit('toggle');
+            },
+            reset: function(){
+                socket.emit('reset');
+            },
+            keyUpListener: function(evt) {
+                if (evt.key === 's') {
+                    this.toggle();
+                }else if (evt.key === 'r') {
+                    this.reset();
+                }
+            }
+        },
+        created: function() {
+            document.addEventListener('keyup', this.keyUpListener);
+        },
+        destroyed: function() {
+            document.removeEventListener('keyup', this.keyUpListener);
+        },
+    });
+
+</script>
+</html>

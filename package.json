@@ -4,11 +4,13 @@
   "description": "5分（最大7分まで延長）のLT用のタイマーです。",
   "main": "index.js",
   "dependencies": {
+    "express": "^4.16.4",
     "socket.io": "^2.2.0"
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "node index.js"
   },
   "repository": {
     "type": "git",

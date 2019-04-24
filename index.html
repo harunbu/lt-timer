@@ -42,6 +42,7 @@
 </div>
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script>
   const ses = [
     {
@@ -102,20 +103,8 @@
       },
     },
     methods: {
-      toggle: function(){
-        if (data.running) {
-          data.preMsec = data.srcMsec;
-          data.running = false;
-        } else if (data.srcMsec < maxMsec) {
-          data.startMsec = (new Date()).getTime();
-          data.running = true;
-        }
-      },
-      reset: function(){
-        data.preMsec = 0;
-        data.srcMsec = 0;
-        data.startMsec = (new Date()).getTime();
-      },
+      toggle: toggle,
+      reset: reset,
       keyUpListener: function(evt) {
         if (evt.key === 's') {
           this.toggle();
@@ -135,6 +124,24 @@
     },
   });
 
+  function toggle()
+  {
+    if (data.running) {
+      data.preMsec = data.srcMsec;
+      data.running = false;
+    } else if (data.srcMsec < maxMsec) {
+      data.startMsec = (new Date()).getTime();
+      data.running = true;
+    }
+  }
+
+  function reset()
+  {
+    data.preMsec = 0;
+    data.srcMsec = 0;
+    data.startMsec = (new Date()).getTime();
+  }
+
   function tick() {
     if (data.running) {
       const preSrcMsec = data.srcMsec;
@@ -150,6 +157,15 @@
       }
     }
   }
+
+  var socket = io();
+
+  socket.on('toggle', function(){
+    toggle();
+  });
+  socket.on('reset', function(){
+    reset();
+  });
 
 </script>
 </html>
